@@ -20,8 +20,28 @@ class PageLoadError extends ScraperError {
     }
 }
 
+class BlockedError extends ScraperError {
+    constructor(
+        message = 'Alibaba bloqueo el acceso y mostr una pagina de CAPTCHA.'
+    ) {
+        super(message, 'ACCESS_BLOCKED');
+        this.name = 'BlockedError';
+    }
+}
+
+class ProductNotFoundError extends ScraperError {
+    constructor(
+        message = 'No se encontro informacion del producto en la pagina.'
+    ) {
+        super(message, 'PRODUCT_NOT_FOUND');
+        this.name = 'ProductNotFoundError';
+    }
+}
+
 module.exports = {
     ScraperError,
     InvalidUrlError,
-    PageLoadError
+    PageLoadError,
+    BlockedError,
+    ProductNotFoundError
 };

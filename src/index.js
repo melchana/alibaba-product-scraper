@@ -1,10 +1,16 @@
 const { fetchPage } = require('./services/browser.service');
 const { parseProduct } = require('./parsers/product.parser');
 const { isValidAlibabaUrl } = require('./utils/validators');
+
 const {
     InvalidUrlError,
-    PageLoadError
+    PageLoadError,
+    ProductNotFoundError
 } = require('./utils/errors');
+
+const {
+    SCRAPER_CONFIG
+} = require('./config/constants');
 
 async function main() {
     const url = process.argv[2];
@@ -28,8 +34,18 @@ async function main() {
 
         const product = parseProduct(html, finalUrl);
 
-        console.log(JSON.stringify(product, null, 2));
+        validateProduct(product);
+
+        console.log(
+            JSON.stringify(
+                product,
+                null,
+                SCRAPER_CONFIG.outputIndent
+            )
+        );
+
     } catch (error) {
+
         console.error(
             JSON.stringify(
                 {
@@ -38,11 +54,38 @@ async function main() {
                     message: error.message
                 },
                 null,
-                2
+                SCRAPER_CONFIG.outputIndent
             )
         );
 
         process.exitCode = 1;
+    }
+}
+
+/**
+ * Verifica que la informacion minima del producto
+ * haya sido encontrada antes de devolver el resultado.
+ *
+ * @param {Object} product
+ * @throws {ProductNotFoundError}
+ */
+function validateProduct(product) {
+    if (!product) {
+        throw new ProductNotFoundError();
+    }
+
+    const hasTitle =
+        typeof product.productTitle === 'string' &&
+        product.productTitle.trim().length > 0;
+
+    const hasProductId =
+        typeof product.productId === 'string' &&
+        product.productId.trim().length > 0;
+
+    if (!hasTitle || !hasProductId) {
+        throw new ProductNotFoundError(
+            'No se encontro informacion identificable del producto.'
+        );
     }
 }
 

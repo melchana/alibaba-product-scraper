@@ -1,5 +1,5 @@
-const ALIBABA_PRODUCT_URL_REGEX =
-    /^https:\/\/www\.alibaba\.com\/product-detail\/.+/i;
+const ALIBABA_HOSTNAME = 'www.alibaba.com';
+const ALIBABA_PRODUCT_PATH = /^\/product-detail\/.+/i;
 
 /**
  * Valida que la URL corresponda a un producto de Alibaba.
@@ -15,11 +15,24 @@ function isValidAlibabaUrl(url) {
     try {
         const parsedUrl = new URL(url);
 
+        const isHttps =
+            parsedUrl.protocol === 'https:';
+
+        const isAlibaba =
+            parsedUrl.hostname.toLowerCase() ===
+            ALIBABA_HOSTNAME;
+
+        const isProductPage =
+            ALIBABA_PRODUCT_PATH.test(
+                parsedUrl.pathname
+            );
+
         return (
-            parsedUrl.protocol === 'https:' &&
-            parsedUrl.hostname === 'www.alibaba.com' &&
-            ALIBABA_PRODUCT_URL_REGEX.test(url)
+            isHttps &&
+            isAlibaba &&
+            isProductPage
         );
+
     } catch {
         return false;
     }
